@@ -40,6 +40,32 @@ service cloud.firestore {
       allow delete: if administrator();
     }
 
+    match /resources/{resourceId} {
+      allow read: if resource.data.status == 'published' || activeStaff();
+      allow create, update: if activeStaff();
+      allow delete: if administrator();
+    }
+
+    match /readingPlans/{planId} {
+      allow read: if resource.data.status == 'published' || activeStaff();
+      allow create, update: if activeStaff();
+      allow delete: if administrator();
+    }
+
+    match /contentViews/{counterId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly([
+          'contentType', 'contentId', 'views', 'lastViewedAt'
+        ])
+        && request.resource.data.contentType in ['resource', 'readingPlan']
+        && request.resource.data.contentId is string
+        && request.resource.data.views == 1;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['views', 'lastViewedAt'])
+        && request.resource.data.views == resource.data.views + 1;
+      allow delete: if administrator();
+    }
+
     match /topics/{topicId} {
       allow read: if true;
       allow create, update: if activeStaff();
