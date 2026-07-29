@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /Christopher/admin-resources.html
+
+Sitemap: https://silly-cheese.github.io/Christopher/sitemap.xml
