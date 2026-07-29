@@ -1,10 +1,10 @@
 # Christopher Shelley — Sermons & Biblical Teaching
 
-A premium sermon library built with React, Vite, GitHub Pages, Firebase Authentication, and Cloud Firestore.
+A premium sermon library and private content-management system built with React, Vite, GitHub Pages, Firebase Authentication, and Cloud Firestore.
 
-## Phase 1 of 3 — Public Experience
+## Completed phases
 
-Phase 1 establishes the complete public foundation:
+### Phase 1 — Public Experience
 
 - Cinematic, mobile-responsive homepage
 - Searchable sermon library
@@ -14,28 +14,36 @@ Phase 1 establishes the complete public foundation:
 - Sermon-series index and detail pages
 - About page
 - Firestore-powered public data layer
-- Firebase Authentication initialized for Phase 2
-- Firestore rules and indexes
-- Automatic GitHub Pages deployment
 - Demonstration content when Firebase is not configured
-
-## Planned phases
 
 ### Phase 2 — Private Content Management
 
-- Owner/admin sign-in
-- Protected dashboard
-- Create, edit, preview, publish, archive, and delete sermons
-- Series and topic management
-- Site settings and featured-message controls
-- Role-aware staff access
+The protected dashboard is available at `#/admin` and includes:
 
-### Phase 3 — Ministry Resource Platform
+- Firebase email/password sign-in
+- Password-reset flow
+- Firestore staff-profile and role verification
+- Responsive administration layout
+- Dashboard content totals and recently updated sermons
+- Create and edit sermons
+- Draft, publish, and archive workflow
+- YouTube URL and video-ID detection
+- Sermon outlines, notes, topics, series, and featured controls
+- Search and status filtering
+- Public sermon preview links
+- Series creation, editing, ordering, publishing, and deletion
+- Site-settings document editing
+- Secure sign-out
+
+See [`docs/PHASE_2_SETUP.md`](docs/PHASE_2_SETUP.md) for the exact Firebase console and first-owner setup.
+
+## Planned Phase 3 — Ministry Resource Platform
 
 - Bible classes and devotionals
 - Downloadable resources
 - Scripture index
 - Reading plans and discussion questions
+- Public site-settings integration
 - Improved discovery and content analytics
 
 ## Local setup
@@ -46,7 +54,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Until Firebase values are added, the site uses polished demonstration content from `src/content.js`.
+Until Firebase values are added, the public site uses polished demonstration content from `src/content.js`, and the admin route displays a configuration checklist.
 
 ## Firebase configuration
 
@@ -61,7 +69,7 @@ VITE_FIREBASE_MESSAGING_SENDER_ID
 VITE_FIREBASE_APP_ID
 ```
 
-Firebase web configuration values identify the project; access control is enforced by `firestore.rules`.
+Firebase web configuration values identify the project; access control is enforced by `firestore.rules`. Do not commit service-account credentials or private keys.
 
 ### Firestore collections
 
@@ -69,11 +77,11 @@ Firebase web configuration values identify the project; access control is enforc
 sermons/{sermonId}
 series/{seriesId}
 topics/{topicId}
-siteSettings/{documentId}
+siteSettings/main
 users/{uid}
 ```
 
-A public sermon should include fields such as:
+A public sermon includes fields such as:
 
 ```js
 {
@@ -81,6 +89,7 @@ A public sermon should include fields such as:
   slug: "gods-kingdom-redefines-greatness",
   scripture: "Philippians 2:1–11",
   scriptureBook: "Philippians",
+  seriesId: "...",
   seriesTitle: "The Kingdom Turns Everything Around",
   seriesSlug: "the-kingdom-turns-everything-around",
   datePreached: "2026-07-12",
@@ -88,14 +97,27 @@ A public sermon should include fields such as:
   speaker: "Christopher Shelley",
   status: "published",
   featured: true,
-  youtubeId: "",
+  youtubeUrl: "https://youtube.com/watch?v=...",
+  youtubeId: "...",
   summary: "...",
   bigIdea: "...",
   topics: ["Humility", "Jesus"],
   outline: ["Point one", "Point two"],
-  notes: [{ heading: "Section title", paragraphs: ["Paragraph one"] }]
+  notes: [{ heading: "Sermon Notes", paragraphs: ["Paragraph one"] }]
 }
 ```
+
+An approved staff profile uses the Firebase Authentication UID as its document ID:
+
+```js
+{
+  displayName: "Christopher Shelley",
+  role: "owner",
+  active: true
+}
+```
+
+Supported roles are `owner`, `admin`, and `editor`.
 
 ## Firestore deployment
 
@@ -110,13 +132,26 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 ## GitHub Pages
 
-The workflow at `.github/workflows/deploy-pages.yml` builds and deploys the site whenever `main` changes.
+The workflow at `.github/workflows/deploy-pages.yml` validates pull requests and deploys the site whenever `main` changes.
 
 Repository setup:
 
 1. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
 2. Add the Firebase values under **Settings → Secrets and variables → Actions**.
-3. Add the GitHub Pages domain to Firebase Authentication authorized domains before Phase 2.
+3. Add `silly-cheese.github.io` to Firebase Authentication authorized domains.
+4. Merge the implementation pull request into `main`.
+
+The expected public URL is:
+
+```text
+https://silly-cheese.github.io/Christopher/
+```
+
+The expected administrator URL is:
+
+```text
+https://silly-cheese.github.io/Christopher/#/admin
+```
 
 ## Technology boundaries
 
@@ -128,4 +163,5 @@ Repository setup:
 - No Firebase Hosting
 - No Firebase Functions
 - No Firebase Storage
+- No Cloudflare
 - No paid backend
