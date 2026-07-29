@@ -6,7 +6,7 @@ Phase 2 adds the private content-management system at:
 https://silly-cheese.github.io/Christopher/#/admin
 ```
 
-The application uses only Firebase Authentication and Cloud Firestore. It does not use Firebase Hosting, Firebase Functions, Firebase Storage, or a paid backend.
+The application uses only Firebase Authentication and Cloud Firestore. It does not use Firebase Hosting, Firebase Functions, Firebase Storage, manually managed Firestore indexes, or a paid backend.
 
 ## 1. Firebase web app connection
 
@@ -14,18 +14,13 @@ The Firebase web-app configuration for project `christopher-5fbc6` is already co
 
 Firebase web configuration identifies the client project and is included in the browser bundle by design. Access is protected by Firebase Authentication and `firestore.rules`. Never commit a service-account JSON file, Admin SDK private key, or other server credential.
 
-For local development, either use the committed production configuration or create a local `.env` file with alternate values.
+## 2. Firestore Test Mode warning
 
-## 2. Create the Firestore database
+The red Firebase banner that says **30 days remaining** is the Test Mode countdown. It is not an error count and it does not mean 30 records were created.
 
-In the Firebase console:
+Test Mode temporarily allows broad public access. Replace it with the repository's secure rules before the countdown reaches zero.
 
-1. Open **Firestore Database**.
-2. Select **Create database**.
-3. Choose **Production mode**.
-4. Select the preferred region.
-
-The repository rules will replace the initial production-mode rules during deployment.
+Only security rules must be deployed. No composite indexes are used.
 
 ## 3. Enable email/password authentication
 
@@ -35,7 +30,7 @@ In Firebase:
 2. Enable **Email/Password**.
 3. Do not add public registration to this website.
 
-The admin portal contains only sign-in and password-reset flows. New administrator accounts must be created deliberately in the Firebase console.
+New administrator accounts must be created deliberately in the Firebase console.
 
 ## 4. Add the GitHub Pages authorized domain
 
@@ -58,8 +53,6 @@ In **Authentication → Users**:
 
 ## 6. Bootstrap the owner profile
 
-The first owner profile must be created manually because the Firestore rules correctly prevent an unapproved account from granting itself a role.
-
 In **Firestore Database**, create:
 
 ```text
@@ -79,28 +72,31 @@ Fields:
 
 Use a Boolean value for `active`, not the text `"true"`.
 
-Supported roles are:
+Supported roles:
 
-- `owner` — complete access, including staff administration
+- `owner` — complete access
 - `admin` — content and settings administration
-- `editor` — sermon and series editing without owner-level user management
+- `editor` — content editing without destructive owner controls
 
-## 7. Deploy Firestore rules and indexes
+## 7. Deploy Firestore security rules
 
 Install the Firebase CLI and authenticate locally, then run:
 
 ```bash
 firebase use christopher-5fbc6
-firebase deploy --only firestore:rules,firestore:indexes
+firebase deploy --only firestore:rules
 ```
 
-The included rules provide:
+There is no `firestore.indexes.json` file and no manual index deployment step.
 
-- Public read access only to published sermons and series
+The final rules provide:
+
+- Public read access only to published sermons, series, resources, and reading plans
 - Private access to drafts and archived content
 - Staff role verification through `users/{uid}`
 - Owner-controlled staff records
-- Administrator-only destructive actions and site settings
+- Administrator-only destructive actions
+- Restricted, privacy-friendly content-view counters
 
 ## 8. Enable GitHub Pages deployment
 
@@ -113,42 +109,25 @@ In the GitHub repository:
 
 ## 9. Sign in
 
-Open:
-
 ```text
 https://silly-cheese.github.io/Christopher/#/admin
 ```
 
-After signing in, the dashboard verifies both:
-
-1. A valid Firebase Authentication session
-2. An active Firestore staff profile with an approved role
-
-## Phase 2 dashboard capabilities
-
-- Dashboard counts for all, published, draft, and archived sermons
-- Create and edit sermons
-- Draft, publish, and archive workflow
-- YouTube URL and video-ID detection
-- Sermon outlines and long-form notes
-- Topic and series assignment
-- Featured-sermon control
-- Public preview links
-- Search and status filters
-- Series creation, ordering, publishing, editing, and deletion
-- Site-settings document editing
-- Password reset and secure sign-out
-- Responsive desktop and mobile administration
+The dashboard verifies both a valid Firebase Authentication session and an active Firestore staff profile.
 
 ## Troubleshooting
 
-### Firebase is not connected yet
+### Red Test Mode warning
 
-Confirm `.env.production` exists on the deployed branch and rerun the GitHub Pages workflow.
+Deploy `firestore.rules`. The warning disappears after the secure rules replace the temporary Test Mode rules.
 
-### The account is not approved
+### White or blank page
 
-Confirm that the `users` document ID exactly matches the Authentication UID and contains:
+The final build includes visible HTML loading screens, a React error boundary, and a global startup-error screen. Refresh once after deployment so the browser loads the new GitHub Pages assets.
+
+### Account not approved
+
+Confirm the `users` document ID exactly matches the Authentication UID and contains:
 
 ```text
 active: true
@@ -157,17 +136,12 @@ role: owner
 
 ### Permission denied
 
-Deploy `firestore.rules`, verify the user's role, and make sure the role value is lowercase.
+Deploy `firestore.rules`, verify the staff role, and make sure the role value is lowercase.
 
-### Login redirects or fails on GitHub Pages
+### Login redirects or fails
 
 Add `silly-cheese.github.io` to Firebase Authentication authorized domains.
 
-### Published sermon does not appear
+### Published content does not appear
 
-Confirm:
-
-- `status` is exactly `published`
-- `datePreached` has a value
-- the required Firestore indexes are deployed
-- the public site is connected to project `christopher-5fbc6`
+Confirm the document status is exactly `published` and the public site is connected to project `christopher-5fbc6`.
