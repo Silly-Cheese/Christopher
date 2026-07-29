@@ -14,62 +14,44 @@ A premium sermon library and private content-management system built with React,
 - Sermon-series index and detail pages
 - About page
 - Firestore-powered public data layer
-- Demonstration content when Firebase is not configured
+- Automatic GitHub Pages deployment
+- Demonstration content when Firestore has no published records
 
 ### Phase 2 — Private Content Management
 
-The protected dashboard is available at `#/admin` and includes:
+- Owner/admin/editor sign-in at `#/admin`
+- Protected dashboard
+- Create, edit, preview, publish, archive, and delete sermons
+- Series management
+- Site settings
+- Role-aware staff access
+- Password reset and persistent Authentication sessions
 
-- Firebase email/password sign-in
-- Password-reset flow
-- Firestore staff-profile and role verification
-- Responsive administration layout
-- Dashboard content totals and recently updated sermons
-- Create and edit sermons
-- Draft, publish, and archive workflow
-- YouTube URL and video-ID detection
-- Sermon outlines, notes, topics, series, and featured controls
-- Search and status filtering
-- Public sermon preview links
-- Series creation, editing, ordering, publishing, and deletion
-- Site-settings document editing
-- Secure sign-out
-
-See [`docs/PHASE_2_SETUP.md`](docs/PHASE_2_SETUP.md) for the exact Firebase console and first-owner setup.
-
-## Planned Phase 3 — Ministry Resource Platform
+### Phase 3 — Planned Ministry Resource Platform
 
 - Bible classes and devotionals
 - Downloadable resources
 - Scripture index
 - Reading plans and discussion questions
-- Public site-settings integration
 - Improved discovery and content analytics
 
 ## Local setup
 
 ```bash
 npm install
-cp .env.example .env
 npm run dev
 ```
 
-Until Firebase values are added, the public site uses polished demonstration content from `src/content.js`, and the admin route displays a configuration checklist.
+The production Firebase project is already connected through `.env.production`. A local `.env` file may be used to override those values during development.
 
-## Firebase configuration
-
-Create a Firebase web app, then add these values to `.env` locally and as GitHub Actions repository secrets for deployment:
+## Firebase project
 
 ```text
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID
+Project ID: christopher-5fbc6
+Authentication domain: christopher-5fbc6.firebaseapp.com
 ```
 
-Firebase web configuration values identify the project; access control is enforced by `firestore.rules`. Do not commit service-account credentials or private keys.
+Firebase web configuration is included in the browser application by design. Authorization is enforced through Firebase Authentication and `firestore.rules`. Never add a service-account JSON file, Admin SDK private key, or other server credential to this repository.
 
 ### Firestore collections
 
@@ -77,7 +59,7 @@ Firebase web configuration values identify the project; access control is enforc
 sermons/{sermonId}
 series/{seriesId}
 topics/{topicId}
-siteSettings/main
+siteSettings/{documentId}
 users/{uid}
 ```
 
@@ -89,7 +71,6 @@ A public sermon includes fields such as:
   slug: "gods-kingdom-redefines-greatness",
   scripture: "Philippians 2:1–11",
   scriptureBook: "Philippians",
-  seriesId: "...",
   seriesTitle: "The Kingdom Turns Everything Around",
   seriesSlug: "the-kingdom-turns-everything-around",
   datePreached: "2026-07-12",
@@ -97,60 +78,52 @@ A public sermon includes fields such as:
   speaker: "Christopher Shelley",
   status: "published",
   featured: true,
-  youtubeUrl: "https://youtube.com/watch?v=...",
-  youtubeId: "...",
+  youtubeId: "",
   summary: "...",
   bigIdea: "...",
   topics: ["Humility", "Jesus"],
   outline: ["Point one", "Point two"],
-  notes: [{ heading: "Sermon Notes", paragraphs: ["Paragraph one"] }]
+  notes: [{ heading: "Section title", paragraphs: ["Paragraph one"] }]
 }
 ```
 
-An approved staff profile uses the Firebase Authentication UID as its document ID:
+## Firebase setup still required
 
-```js
-{
-  displayName: "Christopher Shelley",
-  role: "owner",
-  active: true
-}
-```
+1. Create the Firestore database in Production mode.
+2. Enable Firebase Authentication with Email/Password.
+3. Add `silly-cheese.github.io` under Authentication authorized domains.
+4. Create the first Authentication user.
+5. Create the matching `users/{uid}` Firestore owner document.
+6. Deploy the included Firestore rules and indexes.
 
-Supported roles are `owner`, `admin`, and `editor`.
+See [`docs/PHASE_2_SETUP.md`](docs/PHASE_2_SETUP.md) for exact steps.
 
 ## Firestore deployment
 
 This repository does not use Firebase Hosting, Firebase Functions, or Firebase Storage.
 
-After installing the Firebase CLI and selecting the project:
+After installing the Firebase CLI:
 
 ```bash
-firebase use YOUR_FIREBASE_PROJECT_ID
+firebase use christopher-5fbc6
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
 ## GitHub Pages
 
-The workflow at `.github/workflows/deploy-pages.yml` validates pull requests and deploys the site whenever `main` changes.
+The workflow at `.github/workflows/deploy-pages.yml` builds and deploys the site whenever `main` changes.
 
 Repository setup:
 
-1. Open **Settings → Pages** and set **Source** to **GitHub Actions**.
-2. Add the Firebase values under **Settings → Secrets and variables → Actions**.
-3. Add `silly-cheese.github.io` to Firebase Authentication authorized domains.
-4. Merge the implementation pull request into `main`.
+1. Open **Settings → Pages**.
+2. Set **Source** to **GitHub Actions**.
+3. Merge the implementation pull request into `main`.
 
-The expected public URL is:
-
-```text
-https://silly-cheese.github.io/Christopher/
-```
-
-The expected administrator URL is:
+The expected URLs are:
 
 ```text
-https://silly-cheese.github.io/Christopher/#/admin
+Public site: https://silly-cheese.github.io/Christopher/
+Admin:      https://silly-cheese.github.io/Christopher/#/admin
 ```
 
 ## Technology boundaries
