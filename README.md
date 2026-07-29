@@ -99,9 +99,9 @@ firebase deploy --only firestore:rules
 
 ## GitHub Pages deployment
 
-The workflow at `.github/workflows/deploy-pages.yml` builds every entry point and deploys the generated `dist` directory whenever `main` changes.
+The workflow at `.github/workflows/deploy-pages.yml` builds every entry point and deploys the generated `dist` directory whenever `main` or the active release branch changes.
 
-In **Settings → Pages**, set **Source** to **GitHub Actions**, then merge the implementation pull request into `main`.
+In **Settings → Pages**, set **Source** to **GitHub Actions**. During development, pushes to `agent/phase-1-sermon-platform` deploy the compiled preview; after merge, `main` becomes the production source.
 
 Expected URLs:
 
