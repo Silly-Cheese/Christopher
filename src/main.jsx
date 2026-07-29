@@ -4,6 +4,7 @@ import { HashRouter, Link, NavLink, Outlet, Route, Routes, useLocation, useParam
 import { getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { collection, getDocs, getFirestore, limit, orderBy, query, where } from 'firebase/firestore';
+import AdminApp from './admin';
 import { demoSeries, demoSermons } from './content';
 import './styles.css';
 
@@ -234,7 +235,7 @@ function NotFoundPage() {
 }
 
 function App() {
-  return <><ScrollToTop/><Routes><Route element={<Layout/>}><Route path="/" element={<HomePage/>}/><Route path="/sermons" element={<SermonsPage/>}/><Route path="/sermons/:slug" element={<SermonDetailPage/>}/><Route path="/series" element={<SeriesPage/>}/><Route path="/series/:slug" element={<SeriesDetailPage/>}/><Route path="/about" element={<AboutPage/>}/><Route path="*" element={<NotFoundPage/>}/></Route></Routes></>;
+  return <><ScrollToTop/><Routes><Route path="/admin/*" element={<AdminApp/>}/><Route element={<Layout/>}><Route path="/" element={<HomePage/>}/><Route path="/sermons" element={<SermonsPage/>}/><Route path="/sermons/:slug" element={<SermonDetailPage/>}/><Route path="/series" element={<SeriesPage/>}/><Route path="/series/:slug" element={<SeriesDetailPage/>}/><Route path="/about" element={<AboutPage/>}/><Route path="*" element={<NotFoundPage/>}/></Route></Routes></>;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><HashRouter><App/></HashRouter></React.StrictMode>);
