@@ -40,6 +40,7 @@ A premium sermon, teaching-resource, and biblical-study platform built with Reac
 - Resource and reading-plan draft, publish, archive, preview, and delete workflows
 - Resource analytics and topic-coverage insights
 - Installable web manifest, crawler rules, sitemap, and GitHub Pages metadata
+- Visible startup screens and runtime error recovery instead of blank white pages
 
 ## Local setup
 
@@ -81,17 +82,19 @@ Published sermons, resources, and reading plans are publicly readable. Draft and
 3. `silly-cheese.github.io` is included under Authentication authorized domains.
 4. The owner exists in Firebase Authentication.
 5. A matching `users/{uid}` document contains `displayName`, `role: "owner"`, and `active: true`.
-6. The included Firestore rules and indexes are deployed.
+6. The included Firestore security rules are deployed before the Test Mode countdown expires.
+
+The application uses only Firestore's automatic single-field indexes. There is no composite-index file and no manual index deployment step.
 
 See [`docs/PHASE_2_SETUP.md`](docs/PHASE_2_SETUP.md) for owner setup and [`docs/PHASE_3_SETUP.md`](docs/PHASE_3_SETUP.md) for the final resource-platform launch checklist.
 
 ## Firestore deployment
 
-This repository does not use Firebase Hosting, Firebase Functions, or Firebase Storage.
+This repository does not use Firebase Hosting, Firebase Functions, Firebase Storage, or manually managed Firestore indexes.
 
 ```bash
 firebase use christopher-5fbc6
-firebase deploy --only firestore:rules,firestore:indexes
+firebase deploy --only firestore:rules
 ```
 
 ## GitHub Pages deployment
@@ -126,5 +129,6 @@ Resource Studio:    https://silly-cheese.github.io/Christopher/admin-resources.h
 - No Firebase Hosting
 - No Firebase Functions
 - No Firebase Storage
+- No manual Firestore indexes
 - No Cloudflare
 - No paid backend
